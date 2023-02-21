@@ -1,0 +1,14 @@
+{
+  "name": "mongodb",
+  "version": "1.0.0",
+  "description": "Proyecto de ejemplo MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "start-dev": "nodemon index.js"
+  },
+  "author": "Ismael y Alejandro Fuentes",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^6.9.2"
+  }
+}
