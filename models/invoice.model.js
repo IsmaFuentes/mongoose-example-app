@@ -6,6 +6,7 @@ const InvoiceSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      unique: true,
       match: /^[A-Z0-9\-]{5,}$/,
     },
     baseAmount: {
@@ -19,10 +20,6 @@ const InvoiceSchema = new mongoose.Schema(
     taxAmount: {
       type: Number,
       required: true,
-    },
-    description: {
-      type: String,
-      trim: true,
     },
     breakdown: [
       {

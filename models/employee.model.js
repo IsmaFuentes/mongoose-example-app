@@ -12,6 +12,13 @@ const EmployeeSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
+    identificationNumber: {
+      type: String,
+      trim: true,
+      required: true,
+      uppercase: true,
+      unique: true,
+    },
     birthdate: {
       type: Date,
       required: true,
