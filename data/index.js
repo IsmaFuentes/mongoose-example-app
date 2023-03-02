@@ -3,31 +3,26 @@ const products = [
     code: '001A',
     description: 'Neumático estándar',
     price: 12.65,
-    variations: ['radial', 'diagonal'],
   },
   {
     code: '001B',
     description: 'Llanta de neumático',
     price: 10.5,
-    variations: [],
   },
   {
     code: '001C',
     description: 'Filtro antipolución',
     price: 11.45,
-    variations: [],
   },
   {
     code: '001D',
     description: 'Bugía',
     price: 5.35,
-    variations: [],
   },
   {
     code: '001E',
     description: 'Kit luces de recambio',
     price: 24.99,
-    variations: [],
   },
 ];
 

@@ -18,11 +18,6 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    variations: [
-      {
-        type: String,
-      },
-    ],
   },
   {
     timestamps: true,

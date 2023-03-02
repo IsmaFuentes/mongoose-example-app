@@ -41,84 +41,287 @@ const startApp = async () => {
 
     if (n === 1) {
       // VEHÍCULOS
-      while (true) {
-        console.log(
-          '\n1 - Lista\n2 - Crear\n3 - Actualizar\n4 - Añadir revision\n5 - Borrar\n6 - Atrás\n'
-        );
-        let action = Number(prompt('Selecciona una acción: '));
+      await vehicleActions();
+    }
 
-        if (action === 1) {
-          const vehicles = await mongoose.model('Vehicle').find({});
-          prettyPrint(vehicles);
-        }
+    if (n === 2) {
+      // EMPLEADOS
+      await employeeActions();
+    }
 
-        if (action === 2) {
-          const vehicle = {
-            model: prompt(' - Modelo: '),
-            carplate: prompt(' - Matrícula: '),
-            revisions: [],
-          };
+    if (n === 3) {
+      // PRODUCTOS
+      await productActions();
+    }
 
-          await mongoose
-            .model('Vehicle')
-            .create(vehicle)
-            .then((document) => prettyPrint(document))
-            .catch((err) => console.log(err));
-        }
-
-        if (action === 3) {
-          const id = prompt(' - ID: ');
-          const vehicle = {
-            model: prompt(' - Modelo: '),
-            carplate: prompt(' - Matrícula: '),
-          };
-
-          await mongoose
-            .model('Vehicle')
-            .findByIdAndUpdate(id, vehicle, { runValidators: true, new: true })
-            .then((document) => prettyPrint(document))
-            .catch((err) => console.log(err));
-        }
-
-        if (action === 4) {
-          const id = prompt(' - ID: ');
-          const vehicle = {
-            employee: prompt(' - ID Encargado: '),
-            kilometers: Number(prompt(' - KMS: ')),
-            observations: prompt(' - Observaciones: '),
-          };
-
-          await mongoose
-            .model('Vehicle')
-            .findByIdAndUpdate(
-              id,
-              {
-                $push: { revisions: vehicle },
-              },
-              { new: true, runValidators: true }
-            )
-            .populate('revisions.employee')
-            .then((updated) => console.log(JSON.stringify(updated, null, 2)))
-            .catch((err) => console.log(err));
-        }
-
-        if (action === 5) {
-          const id = prompt(' - ID: ');
-          await mongoose
-            .model('Vehicle')
-            .findByIdAndRemove(id)
-            .then(() => console.log('documento eliminado'))
-            .catch((err) => console.log(err));
-        }
-
-        if (action === 6) {
-          break;
-        }
-      }
+    if (n === 4) {
+      // FACTURAS
+      await invoiceActions();
     }
 
     if (n === 5) {
       process.exit(0);
+    }
+  }
+};
+
+const invoiceActions = async () => {
+  while (true) {
+    console.log('\n1 - Lista\n2 - Generar\n3 - Borrar\n4 - Atrás\n');
+
+    let action = Number(prompt('Selecciona una acción: '));
+
+    if (action === 1) {
+      // Lista
+      const invoices = await mongoose.model('Invoice').find({});
+      prettyPrint(invoices);
+    }
+
+    if (action === 2) {
+      // Autogenerar factura
+      const products = await mongoose.model('Product').find({}).lean();
+      const baseAmount = products.reduce((acc, prod) => acc + prod.price, 0);
+      const totalAmount = baseAmount * 1.21;
+      const taxAmount = totalAmount - baseAmount;
+
+      const invoice = {
+        identificationNumber: `F-${Math.floor(Math.random() * 9999)}`,
+        baseAmount,
+        taxAmount,
+        totalAmount,
+        breakdown: products.map((prod) => {
+          return {
+            product: prod._id,
+            description: prod.description,
+            unitAmount: prod.price,
+            quantity: 1,
+          };
+        }),
+      };
+
+      await mongoose
+        .model('Invoice')
+        .create(invoice)
+        .then((data) => console.log(JSON.stringify(data, null, 2)))
+        .catch((err) => console.log(`[ERROR]: ${err.message}`));
+    }
+
+    if (action === 3) {
+      // Borrar
+      const id = prompt(' - ID: ');
+      await mongoose
+        .model('Invoice')
+        .findByIdAndRemove(id)
+        .then(() => console.log('documento eliminado'))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 4) {
+      break;
+    }
+  }
+};
+
+const productActions = async () => {
+  while (true) {
+    console.log('\n1 - Lista\n2 - Crear\n3 - Actualizar\n4 - Borrar\n5 - Atrás\n');
+
+    let action = Number(prompt('Selecciona una acción: '));
+
+    if (action === 1) {
+      // Lista
+      const products = await mongoose.model('Product').find({});
+      prettyPrint(products);
+    }
+
+    if (action === 2) {
+      // Crear
+      const product = {
+        code: prompt(' - Código: '),
+        description: prompt(' - Descripción: '),
+        price: Number(prompt(' - Precio: ')),
+      };
+
+      await mongoose
+        .model('Product')
+        .create(product)
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 3) {
+      // Actualizar
+      const id = prompt(' - ID: ');
+      const product = {
+        code: prompt(' - Código: '),
+        description: prompt(' - Descripción: '),
+        price: Number(prompt(' - Precio: ')),
+      };
+
+      await mongoose
+        .model('Product')
+        .findByIdAndUpdate(id, product, { runValidators: true, new: true })
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 4) {
+      // Borrar
+      const id = prompt(' - ID: ');
+      await mongoose
+        .model('Product')
+        .findByIdAndRemove(id)
+        .then(() => console.log('documento eliminado'))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 5) {
+      console.log('quit');
+      break;
+    }
+  }
+};
+
+const employeeActions = async () => {
+  while (true) {
+    console.log('\n1 - Lista\n2 - Crear\n3 - Actualizar\n4 - Borrar\n5 - Atrás\n');
+
+    let action = Number(prompt('Selecciona una acción: '));
+
+    if (action === 1) {
+      // Lista
+      const employees = await mongoose.model('Employee').find({});
+      prettyPrint(employees);
+    }
+
+    if (action === 2) {
+      // Crear
+      const employee = {
+        name: prompt(' - Nombre: '),
+        surnames: prompt(' - Apellidos: '),
+        identificationNumber: prompt(' - DNI: '),
+        birthdate: prompt(' - Fecha de nacimiento: '),
+      };
+
+      await mongoose
+        .model('Employee')
+        .create(employee)
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 3) {
+      // Actualizar
+      const id = prompt(' - ID: ');
+      const employee = {
+        name: prompt(' - Nombre: '),
+        surnames: prompt(' - Apellidos: '),
+        identificationNumber: prompt(' - DNI: '),
+        birthdate: prompt(' - Fecha de nacimiento: '),
+      };
+
+      await mongoose
+        .model('Employee')
+        .findByIdAndUpdate(id, employee, { runValidators: true, new: true })
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 4) {
+      // Borrar
+      const id = prompt(' - ID: ');
+      await mongoose
+        .model('Employee')
+        .findByIdAndRemove(id)
+        .then(() => console.log('documento eliminado'))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 5) {
+      break;
+    }
+  }
+};
+
+const vehicleActions = async () => {
+  while (true) {
+    console.log(
+      '\n1 - Lista\n2 - Crear\n3 - Actualizar\n4 - Añadir revision\n5 - Borrar\n6 - Atrás\n'
+    );
+
+    let action = Number(prompt('Selecciona una acción: '));
+
+    if (action === 1) {
+      // Listado
+      const vehicles = await mongoose.model('Vehicle').find({});
+      prettyPrint(vehicles);
+    }
+
+    if (action === 2) {
+      // Crear
+      const vehicle = {
+        model: prompt(' - Modelo: '),
+        carplate: prompt(' - Matrícula: '),
+        revisions: [],
+      };
+
+      await mongoose
+        .model('Vehicle')
+        .create(vehicle)
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 3) {
+      // Actualizar
+      const id = prompt(' - ID: ');
+      const vehicle = {
+        model: prompt(' - Modelo: '),
+        carplate: prompt(' - Matrícula: '),
+      };
+
+      await mongoose
+        .model('Vehicle')
+        .findByIdAndUpdate(id, vehicle, { runValidators: true, new: true })
+        .then((document) => prettyPrint(document))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 4) {
+      // Añadir revisión
+      const id = prompt(' - ID: ');
+      const vehicle = {
+        employee: prompt(' - ID Encargado: '),
+        kilometers: Number(prompt(' - KMS: ')),
+        observations: prompt(' - Observaciones: '),
+      };
+
+      await mongoose
+        .model('Vehicle')
+        .findByIdAndUpdate(
+          id,
+          {
+            $push: { revisions: vehicle },
+          },
+          { new: true, runValidators: true }
+        )
+        .populate('revisions.employee')
+        .then((updated) => console.log(JSON.stringify(updated, null, 2)))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 5) {
+      // Borrar
+      const id = prompt(' - ID: ');
+      await mongoose
+        .model('Vehicle')
+        .findByIdAndRemove(id)
+        .then(() => console.log('documento eliminado'))
+        .catch((err) => console.log(err));
+    }
+
+    if (action === 6) {
+      break;
     }
   }
 };
@@ -138,107 +341,3 @@ const createDemoData = async () => {
     }
   });
 };
-
-// while (true) {
-//   console.log('\n1 - Mostrar lista de vehículos');
-//   console.log('2 - Mostrar lista de empleados');
-//   console.log('3 - Dar de alta un empleado');
-//   console.log('4 - Mostrar lista de productos');
-//   console.log('5 - Añadir una revisión');
-//   console.log('6 - Crear una factura');
-//   console.log('0 - Salir\n');
-
-//   const n = Number(prompt('¿que acción quieres realizar?: '));
-
-//   if (!isNaN(n)) {
-//     if (n === 1) {
-//       // mostrar lista de vehículos
-//       let data = await mongoose.model('Vehicle').find({}).populate('revisions.employee');
-//       console.log(JSON.stringify(data, null, 2));
-//     }
-
-//     if (n === 2) {
-//       // mostrar lista de empleados
-//       let data = await mongoose.model('Employee').find({});
-//       console.log(JSON.stringify(data, null, 2));
-//     }
-
-//     if (n === 3) {
-//       // dar de alta empleados
-//       let name = prompt('Nombre: ');
-//       let surnames = prompt('Apellidos: ');
-//       let dni = prompt('DNI: ');
-//       let date = prompt('Fecha nacimiento: ');
-
-//       if (isNaN(Date.parse(date)) === false) {
-//         await mongoose
-//           .model('Employee')
-//           .create({ name, surnames, identificationNumber: dni, birthdate: date })
-//           .then((emp) => console.log(JSON.stringify(emp, null, 2)))
-//           .catch((err) => console.log(err));
-//       } else {
-//         console.log('¡Fecha inválida!');
-//       }
-//     }
-
-//     if (n === 4) {
-//       // mostrar lista de productos
-//       let data = await mongoose.model('Product').find({});
-//       console.log(JSON.stringify(data, null, 2));
-//     }
-
-//     if (n === 5) {
-//       // añadir revisión a un vehículo
-//       let vehicleId = prompt('Id del vehículo: ');
-//       let employeeId = prompt('Id del encargado: ');
-//       let kms = Number(prompt('Kilometros del coche: '));
-//       let observations = prompt('Observaciones: ');
-
-//       await mongoose
-//         .model('Vehicle')
-//         .findByIdAndUpdate(
-//           vehicleId,
-//           {
-//             $push: { revisions: { kilometers: kms, employee: employeeId, observations } },
-//           },
-//           { new: true, runValidators: true }
-//         )
-//         .populate('revisions.employee')
-//         .then((updated) => console.log(JSON.stringify(updated, null, 2)));
-//     }
-
-//     if (n === 6) {
-//       // generar factura (autogenerada a partir de la lista de productos)
-//       const products = await mongoose.model('Product').find({}).lean();
-//       const baseAmount = products.reduce((acc, prod) => acc + prod.price, 0);
-//       const totalAmount = baseAmount * 1.21;
-//       const taxAmount = totalAmount - baseAmount;
-
-//       const invoice = {
-//         identificationNumber: 'F-0012345',
-//         baseAmount,
-//         taxAmount,
-//         totalAmount,
-//         breakdown: products.map((prod) => {
-//           return {
-//             product: prod._id,
-//             description: prod.description,
-//             unitAmount: prod.price,
-//             quantity: 1,
-//           };
-//         }),
-//       };
-
-//       await mongoose
-//         .model('Invoice')
-//         .create(invoice)
-//         .then((data) => console.log(JSON.stringify(data, null, 2)))
-//         .catch((err) => console.log(`[ERROR]: ${err.message}`));
-//     }
-
-//     if (n === 0) {
-//       // salir
-//       process.exit(0);
-//     }
-//   }
-// }
