@@ -301,7 +301,7 @@ const vehicleActions = async () => {
         .findByIdAndUpdate(
           id,
           {
-            $push: { revisions: vehicle },
+            $push: { revisions: vehicle }, // para eliminar usar $pull
           },
           { new: true, runValidators: true }
         )
