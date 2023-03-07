@@ -35,9 +35,9 @@ const EmployeeSchema = new mongoose.Schema(
   }
 );
 
-EmployeeSchema.pre('findOneAndDelete', function (next) {
+EmployeeSchema.pre('findOneAndDelete', async function (next) {
   const { _id } = this._conditions;
-  const count = mongoose.model('Vehicle').countDocuments({ 'revisions.employee': _id });
+  const count = await mongoose.model('Vehicle').countDocuments({ 'revisions.employee': _id });
   if (count > 0) {
     throw new Error('Algunos vehículos dependen del empleado');
   }
