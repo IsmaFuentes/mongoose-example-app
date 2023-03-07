@@ -4,7 +4,6 @@ const models = require('./models');
 
 const connectionString = 'mongodb://localhost:27017/taller-db';
 
-mongoose.Promise = global.Promise;
 mongoose.set('strictQuery', false);
 mongoose.connect(connectionString, { autoIndex: true });
 
