@@ -289,7 +289,7 @@ const vehicleActions = async () => {
     if (action === 4) {
       // Añadir revisión
       const id = prompt(' - ID: ');
-      const vehicle = {
+      const revision = {
         employee: prompt(' - ID Encargado: '),
         kilometers: Number(prompt(' - KMS: ')),
         observations: prompt(' - Observaciones: '),
@@ -300,7 +300,7 @@ const vehicleActions = async () => {
         .findByIdAndUpdate(
           id,
           {
-            $push: { revisions: vehicle }, // para eliminar usar $pull
+            $push: { revisions: revision }, // para eliminar usar $pull
           },
           { new: true, runValidators: true }
         )
